@@ -5,9 +5,9 @@
 #include "dbg/dbg.h"
 
 /*
- * Description : Allocate a new D3D9Object
- * D3D9ObjectType type : Type of the object to create
- * Return : D3D9Object * an allocated D3D9Object
+ * Description                 : Allocate a new D3D9Object
+ * D3D9ObjectType type         : Type of the object to create
+ * Return                      : D3D9Object * an allocated D3D9Object
  */
 D3D9Object *
 D3D9ObjectFactory_createD3D9Object (
@@ -26,11 +26,11 @@ D3D9ObjectFactory_createD3D9Object (
 }
 
 /*
- * Description : Initialize an allocated D3D9ObjectRect object.
- * int x, y : {x, y} position of the text
- * int w, h : width and height
- * D3DCOLOR color : color of the rectangle
- * Return : void
+ * Description                 : Initialize an allocated D3D9ObjectRect object.
+ * int x, y                    : {x, y} position of the text
+ * int w, h                    : width and height
+ * D3DCOLOR color              : color of the rectangle
+ * Return                      : void
  */
 bool
 D3D9ObjectRect_init (
@@ -52,15 +52,15 @@ D3D9ObjectRect_init (
 }
 
 /*
- * Description : Initialize an allocated D3D9ObjectText object.
- * D3D9Object * this : An allocated D3D9Object
- * IDirect3DDevice9 * pDevice : An allocated IDirect3DDevice9
- * int x, y : {x, y} position of the text
- * D3DCOLOR color : color of the text
- * char * string : String of the text
- * int fontSize : the size of the font
- * char * fontFamily : The name of the family font. If NULL, "Arial" is used.
- * Return : void
+ * Description                 : Initialize an allocated D3D9ObjectText object.
+ * D3D9Object * this           : An allocated D3D9Object
+ * IDirect3DDevice9 * pDevice  : An allocated IDirect3DDevice9
+ * int x, y                    : {x, y} position of the text
+ * D3DCOLOR color              : color of the text
+ * char * string               : String of the text
+ * int fontSize                : the size of the font
+ * char * fontFamily           : The name of the family font. If NULL, "Arial" is used.
+ * Return                      : void
  */
 bool
 D3D9ObjectText_init (
@@ -107,14 +107,14 @@ D3D9ObjectText_init (
 }
 
 /*
- * Description : Initialize an allocated D3D9ObjectSprite object.
- * D3D9Object * this : An allocated D3D9Object
- * IDirect3DDevice9 * pDevice : An allocated IDirect3DDevice9
- * char * filePath : Absolute or relative path of the image
- * int x, y : {x, y} position of the text
- * int w, h : width and height
- * D3DCOLOR color : color of the rectangle
- * Return : bool True on success, false otherwise
+ * Description                 : Initialize an allocated D3D9ObjectSprite object.
+ * D3D9Object * this           : An allocated D3D9Object
+ * IDirect3DDevice9 * pDevice  : An allocated IDirect3DDevice9
+ * char * filePath             : Absolute or relative path of the image
+ * int x, y                    : {x, y} position of the text
+ * int w, h                    : width and height
+ * D3DCOLOR color              : color of the rectangle
+ * Return                      : bool True on success, false otherwise
  */
 bool
 D3D9ObjectSprite_init (
@@ -153,12 +153,12 @@ D3D9ObjectSprite_init (
 /// ===== Drawing utilities =====
 
 /*
- * Description : Draw text at a given position / color on the screen
- * IDirect3DDevice9 * pDevice : An allocated d3d9 device
- * ID3DXFont * font : An allocated DXFONT
- * int x, int y : Position of the text on the screen
- * D3DCOLOR color : Color of the text
- * char *text : Text to write on the screen
+ * Description                 : Draw text at a given position / color on the screen
+ * IDirect3DDevice9 * pDevice  : An allocated d3d9 device
+ * ID3DXFont * font            : An allocated DXFONT
+ * int x, int y                : Position of the text on the screen
+ * D3DCOLOR color              : Color of the text
+ * char *text                  : Text to write on the screen
  */
 void
 D3D9Hook_drawText (
@@ -173,11 +173,11 @@ D3D9Hook_drawText (
 }
 
 /*
- * Description : Draw a rectangle at a given position / color on the screen
- * IDirect3DDevice9 * pDevice : An allocated d3d9 device
- * int x, int y : Position of the text on the screen
- * int w, int h : Width and Height of the rectangle
- * D3DCOLOR color : Color of the rectangle
+ * Description                 : Draw a rectangle at a given position / color on the screen
+ * IDirect3DDevice9 * pDevice  : An allocated d3d9 device
+ * int x, int y                : Position of the text on the screen
+ * int w, int h                : Width and Height of the rectangle
+ * D3DCOLOR color              : Color of the rectangle
  */
 void
 D3D9Hook_drawRect (
@@ -191,10 +191,10 @@ D3D9Hook_drawRect (
 }
 
 /*
- * Description : Draw a sprite at a given position on the screen
- * ID3DXSprite * sprite : Sprite of the image
+ * Description                 : Draw a sprite at a given position on the screen
+ * ID3DXSprite * sprite        : Sprite of the image
  * IDirect3DTexture9 * texture : Texture of the image
- * int x, y : Position {x, y} where to display the sprite on the screen
+ * int x, y                    : Position {x, y} where to display the sprite on the screen
  */
 void
 D3D9Hook_drawSprite (
