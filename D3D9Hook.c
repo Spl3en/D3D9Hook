@@ -180,7 +180,7 @@ D3D9Hook_init (
 			0x89, 0x86, '?', '?', '?', '?'
 	};
 
-	// Get the d3d9 device
+	// Get the d3d9 device vftable
 	DWORD * pDeviceVftable = (DWORD *) mem_scanner ("pDeviceVftable",
 		baseAddress, sizeOfModule,
 		pattern,
