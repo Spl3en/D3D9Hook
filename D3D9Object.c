@@ -315,6 +315,46 @@ D3D9ObjectFactory_release (
 }
 
 
+/*
+ * Description : Get the top level object that is hovered. If no object is hovered, return NULL
+ * HWND hWindow : The window containing the directX context
+ * Return : A pointer to the hovered object, or NULL
+ */
+D3D9Object *
+D3D9ObjectFactory_get_hovered_object (
+	HWND hWindow
+) {
+	int mouseX, mouseY;
+	get_mouse_pos_in_window (hWindow, &mouseX, &mouseY);
+
+	foreach_bbqueue_item_reversed (&d3d9ObjectFactory.drawObjects, D3D9Object *object)
+	{
+		switch (object->type)
+		{
+			case D3D9_OBJECT_RECTANGLE: {
+				D3D9ObjectRect *rect = &object->rect;
+				if (in_bound (mouseX, mouseY, object->x, object->y, object->x + rect->w, object->y + rect->h)) {
+					return object;
+				}
+			} break;
+
+			case D3D9_OBJECT_SPRITE: {
+				D3D9ObjectSprite *sprite = &object->sprite;
+				if (in_bound (mouseX, mouseY, object->x, object->y, object->x + sprite->w, object->y + sprite->h)) {
+					return object;
+				}
+			} break;
+
+			default :
+				continue;
+			break;
+		}
+	}
+
+	return NULL;
+}
+
+
 /// ===== D3D9Object =====
 /*
  * Description : Move an allocated D3D9Object on the screen
@@ -354,7 +394,9 @@ D3D9ObjectRect_init (
 	this->y = y;
 	rect->w = w;
 	rect->h = h;
-	rect->color = D3DCOLOR_RGBA (r, g, b, 255);
+	rect->r = r;
+	rect->g = g;
+	rect->b = b;
 
 	dbg ("Rectangle <ID=%d | x=%d | y=%d | w=%d | h=%d | rgb=%02X%02X%02X> has been created.", this->id, x, y, w, h, r, g, b);
 
@@ -362,6 +404,26 @@ D3D9ObjectRect_init (
 
 	D3D9ObjectFactory_release ();
 	return true;
+}
+
+/*
+ * Description : Set attributes of a D3D9ObjectRect
+ * D3D9ObjectRect *this : An allocated D3D9ObjectRect
+ * byte r, byte g, byte b : New color of the rectangle
+ * int w, int h : Width and height of the rectangle
+ * Return : void
+ */
+void
+D3D9ObjectRect_set (
+	D3D9ObjectRect *this,
+	byte r, byte g, byte b,
+	int w, int h
+) {
+	this->r = r;
+	this->g = g;
+	this->b = b;
+	this->w = w;
+	this->h = h;
 }
 
 /*
@@ -453,7 +515,6 @@ D3D9ObjectText_set (
 	this->g = g;
 	this->b = b;
 	this->opacity = (opacity * 255 > 255) ? 255 : opacity * 255;
-	dbg ("opacity = %d / %f", this->opacity, opacity);
 }
 
 /*
@@ -503,6 +564,20 @@ D3D9ObjectSprite_init (
 }
 
 /*
+ * Description : Set new attribute to D3D9ObjectSprite
+ * D3D9ObjectText *this : An allocated D3D9ObjectSprite
+ * float opacity : opacity of the sprite
+ * Return : void
+ */
+void
+D3D9ObjectSprite_set (
+	D3D9ObjectSprite *this,
+	float opacity
+) {
+	this->opacity = (opacity * 255 > 255) ? 255 : opacity * 255;
+}
+
+/*
  * Description                 : Initialize D3D9ObjectSprite DirectX objects.
  *                               /!\ This function must be called only from the DirectX thread.
  * IDirect3DDevice9 * pDevice  : An allocated IDirect3DDevice9
@@ -518,11 +593,30 @@ D3D9ObjectSprite_init_directx (
 		D3D9ObjectSprite * sprite = &this->sprite;
 
 		// Create the texture
-		if ((D3DXCreateTextureFromFile (pDevice, sprite->filePath, &sprite->texture)) != D3D_OK) {
+		if ((D3DXCreateTextureFromFileEx (
+				pDevice,
+				sprite->filePath,
+				D3DX_DEFAULT,
+				D3DX_DEFAULT,
+				D3DX_DEFAULT,
+				0,
+				D3DFMT_UNKNOWN,
+				D3DPOOL_MANAGED,
+				D3DX_DEFAULT,
+				D3DX_DEFAULT,
+				0,
+				NULL,
+				NULL,
+				&sprite->texture)) != D3D_OK) {
 			warn ("Cannot create the texture <%s>.", sprite->filePath);
 			sprite->status = D3D9_OBJECT_SPRITE_ERROR;
 			continue;
 		}
+
+		D3DSURFACE_DESC surfaceDesc;
+		sprite->texture->lpVtbl->GetLevelDesc (sprite->texture, 0, &surfaceDesc);
+		sprite->w = surfaceDesc.Width;
+		sprite->h = surfaceDesc.Height;
 
 		// Create the sprite
 		if ((D3DXCreateSprite (pDevice, &sprite->sprite)) != D3D_OK) {
@@ -542,18 +636,20 @@ D3D9ObjectSprite_init_directx (
 
 /*
  * Description                 : Draw a rectangle at a given position / color on the screen
- * D3D9ObjectRect *rect        : An allocated D3D9ObjectRect
+ * D3D9ObjectRect *this        : An allocated D3D9ObjectRect
  * int x, y                    : {x, y} position of the rectangle
  * IDirect3DDevice9 * pDevice  : An allocated d3d9 device
  */
 void
 D3D9ObjectRect_draw (
-	D3D9ObjectRect *rect,
+	D3D9ObjectRect *this,
 	int x, int y,
 	IDirect3DDevice9 * pDevice
 ) {
-	D3DRECT rectPosition = {x, y, x + rect->w, y + rect->h};
-	pDevice->lpVtbl->Clear (pDevice, 1, &rectPosition, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, rect->color, 0,  0);
+	D3DRECT rectPosition = {x, y, x + this->w, y + this->h};
+	D3DCOLOR color = D3DCOLOR_RGBA (this->r, this->g, this->b, 255);
+
+	pDevice->lpVtbl->Clear (pDevice, 1, &rectPosition, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, color, 0,  0);
 }
 
 /*
@@ -590,8 +686,7 @@ D3D9ObjectSprite_draw (
 	ID3DXSprite * sprite        = this->sprite;
 	IDirect3DTexture9 * texture = this->texture;
 	D3DXVECTOR3 position3D      = {x, y, 0.0};
-	int opacity = (this->opacity * 255 > 255) ? 255 : this->opacity * 255;
-	D3DCOLOR color              = D3DCOLOR_ARGB (opacity, 255, 255, 255);
+	D3DCOLOR color              = D3DCOLOR_ARGB (this->opacity, 255, 255, 255);
 
 	sprite->lpVtbl->Begin (sprite, D3DXSPRITE_ALPHABLEND);
 	sprite->lpVtbl->Draw (sprite, texture, NULL, NULL, &position3D, color);

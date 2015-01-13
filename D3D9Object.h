@@ -6,6 +6,7 @@
 #include "dx/d3d9.h"
 #include "dx/d3dx9.h"
 #include "BbQueue/BbQueue.h"
+#include "Win32Tools/Win32Tools.h"
 
 // ---------- Defines -------------
 
@@ -36,7 +37,7 @@ typedef enum {
 typedef struct
 {
 	int w, h;
-	D3DCOLOR color;
+	byte r, g, b;
 
 } 	D3D9ObjectRect;
 
@@ -56,6 +57,7 @@ typedef struct
 	ID3DXSprite * sprite;
 	IDirect3DTexture9 * texture;
 	D3D9ObjectSpriteStatus status;
+	int w, h;
 
 } 	D3D9ObjectSprite;
 
@@ -207,6 +209,16 @@ D3D9ObjectSprite_init_directx (
 	IDirect3DDevice9 * pDevice
 );
 
+/*
+ * Description : Get the top level object that is hovered. If no object is hovered, return NULL
+ * HWND hWindow : The window containing the directX context
+ * Return : A pointer to the hovered object, or NULL
+ */
+D3D9Object *
+D3D9ObjectFactory_get_hovered_object (
+	HWND hWindow
+);
+
 /// ===== D3D9Object =====
 
 /*
@@ -235,6 +247,21 @@ D3D9ObjectRect_init (
 	int w, int h,
 	byte r, byte g, byte b
 );
+
+/*
+ * Description : Set attributes of a D3D9ObjectRect
+ * D3D9ObjectRect *this : An allocated D3D9ObjectRect
+ * byte r, byte g, byte b : New color of the rectangle
+ * int w, int h : Width and height of the rectangle
+ * Return : void
+ */
+void
+D3D9ObjectRect_set (
+	D3D9ObjectRect *this,
+	byte r, byte g, byte b,
+	int w, int h
+);
+
 
 /*
  * Description                 : Initialize an allocated D3D9ObjectText object.
@@ -291,6 +318,18 @@ D3D9ObjectSprite_init (
 	IDirect3DDevice9 * pDevice,
 	char *filePath,
 	int x, int y,
+	float opacity
+);
+
+/*
+ * Description : Set new attribute to D3D9ObjectSprite
+ * D3D9ObjectText *this : An allocated D3D9ObjectSprite
+ * float opacity : opacity of the sprite
+ * Return : void
+ */
+void
+D3D9ObjectSprite_set (
+	D3D9ObjectSprite *this,
 	float opacity
 );
 
