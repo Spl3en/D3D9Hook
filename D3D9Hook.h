@@ -148,8 +148,8 @@ typedef enum
 
 /*
  * Description 	: Allocate a new D3D9Hook structure.
- * DWORD baseAddress : Base address of the module
- * DWORD hudChatInstance : The address of hudChat
+ * DWORD baseAddress : Base address of the in-memory D3D9 module
+ * DWORD sizeOfModule : The size of the module
  * Return		: A pointer to an allocated D3D9Hook.
  */
 D3D9Hook *
@@ -163,8 +163,8 @@ D3D9Hook_new (
 /*
  * Description : Initialize an allocated D3D9Hook structure.
  * D3D9Hook *this : An allocated D3D9Hook to initialize.
- * DWORD baseAddress : Base address of the module
- * DWORD hudChatInstance : The address of hudChat
+ * DWORD baseAddress : Base address of the in-memory D3D9 module
+ * DWORD sizeOfModule : The size of the module
  */
 bool
 D3D9Hook_init (
